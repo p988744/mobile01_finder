@@ -43,8 +43,14 @@ def merge_two_dicts(x, y):
 def get_article_comment(host_url,url):
 	res = rs.get(host_url+url, headers=ua)
 	soup = BeautifulSoup(res.text, "lxml")
-	comment_pages = soup.select(".contentfoot .numbers")[0].get_text().encode("utf-8")
-	print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
+	try:
+		comment_pages = soup.select(".contentfoot .numbers")[0].get_text().encode("utf-8")
+		print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
+	except Exception, e:
+		res = rs.get(host_url+url, headers=ua)
+		soup = BeautifulSoup(res.text, "lxml")
+		comment_pages = soup.select(".contentfoot .numbers")[0].get_text().encode("utf-8")
+		print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
 	comments = soup.select('main .single-post')
 	comment_data_dict = {}
 	for comment in comments:
@@ -143,7 +149,7 @@ if len(entrys) == 1:
 	for page in range(1,pages+1):
 		page_url = url+"&p="+str(page)
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
-		time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+		time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
 		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
 		# break
 
@@ -159,8 +165,8 @@ if len(entrys) == 1:
 		for comment_page in range(1,int(articles[key]["comment_pages"])):
 			comment_page_url = articles[key]["url"]+"&p="+str(comment_page)
 			comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
-			time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
-			
+			time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
+
 			# break
 		articles[key].update({"comments":comments})
 		# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
