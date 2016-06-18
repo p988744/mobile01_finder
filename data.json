@@ -1,0 +1,26 @@
+{
+  "board":{
+    "title":"健康與養生",
+    "articles":[{
+      "article_title":"",
+      "article_url":"",
+      "article_popularity":"",
+      "article_reply_amount":"",
+      "article_time":"",
+      "article_content":"",
+      "article_author":"",
+      "comments":[
+          {
+          "author":"",
+          "time":"",
+          "content":""
+          },
+          {
+          "author":"",
+          "time":"",
+          "content":""
+          }
+          ]
+      }]
+  }
+}
