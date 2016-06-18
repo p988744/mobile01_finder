@@ -5,6 +5,7 @@ import requests
 import MySQLdb
 import re
 import io
+import os
 import sys
 import db_settings
 import functions
@@ -146,6 +147,11 @@ if len(entrys) == 1:
 data = json.dumps(articles, ensure_ascii=False)
 print "++++++++++++++++++++++++++ JSON ++++++++++++++++++++++++++"
 print data
+
+# 檢查目錄是否存在
+directory = "results"
+if not os.path.exists(directory):
+    os.makedirs(directory)
 with open('results/data.txt', 'w') as outfile:
     json.dump(unicode(data, "utf-8"), outfile)
 
