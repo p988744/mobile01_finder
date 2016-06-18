@@ -17,6 +17,23 @@ import time
 import  json
 from operator import itemgetter, attrgetter
 
+def printProgress (iteration, total, prefix = '', suffix = '', decimals = 2, barLength = 20):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+    """
+    filledLength    = int(round(barLength * iteration / float(total)))
+    percents        = round(100.00 * (iteration / float(total)), decimals)
+    bar             = '#' * filledLength + '-' * (barLength - filledLength)
+    Sys.stdout.write('%s [%s] %s%s %s\r' % (prefix, bar, percents, '%', suffix)),
+    Sys.stdout.flush()
+    if iteration == total:
+        print("\n")
+
 def merge_two_dicts(x, y):
     '''Given two dicts, merge them into a new dict as a shallow copy.'''
     z = x.copy()
@@ -123,10 +140,11 @@ if len(entrys) == 1:
 	print "total pages:" + str(pages)
 	##### 取得所有文章網址 #####
 	articles = {} 
-	for page in range(1,pages):
+	for page in range(1,pages+1):
 		page_url = url+"&p="+str(page)
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
 		time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
 		# break
 
 	for key in articles.keys():
