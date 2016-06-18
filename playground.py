@@ -1,7 +1,7 @@
-def change_p(p):
-	self.p = 10
-	print "change_p" + str(p)
+import time
 
-p = 1
-change_p(p)
-print "origin" + str(p)
+for i in range(1,100):
+	fw = open('playground.txt','w')
+	fw.write(str(i)+'\n')
+	time.sleep(0.1)
+	fw.close()
