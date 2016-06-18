@@ -127,7 +127,7 @@ if len(entrys) == 1:
 		page_url = url+"&p="+str(page)
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
 		time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
-		break
+		# break
 
 	for key in articles.keys():
 		article_id = articles[key]["url"].split('&t=')[-1]
