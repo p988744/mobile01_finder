@@ -145,7 +145,7 @@ if len(entrys) == 1:
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
 		time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
 		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
-		break
+		# break
 
 	for key in articles.keys():
 
@@ -160,7 +160,7 @@ if len(entrys) == 1:
 			comment_page_url = articles[key]["url"]+"&p="+str(comment_page)
 			comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
 			time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
-			printProgress (articles.keys().index(key), len(articles.keys()), prefix = 'fetching articles...', suffix = '', decimals = 2, barLength = 20)
+			
 			# break
 		articles[key].update({"comments":comments})
 		# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
