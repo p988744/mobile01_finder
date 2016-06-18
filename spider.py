@@ -82,7 +82,7 @@ def get_board_content(host_url,url):
 		article_title = article.select('.subject a')[0].get_text().encode("utf-8") # 主題
 		article_url = article.select('.subject a')[0].get('href') #文章網址
 		article_popularity = article.select('.subject a')[0].get('title').encode("utf-8").replace('人氣:','') # 人氣
-		article_reply_amount = article.select('.reply')[0].get_text().encode("utf-8")  # 回覆數量
+		article_reply_amount = article.select('.reply')[0].get_text().encode("utf-8").replace(",",'')  # 回覆數量
 		article_time = article.select('.authur a p')[0].get_text().encode("utf-8") # 新增時間
 		article_author = article.select('.authur a')[0].get_text().encode("utf-8").replace(article_time,'') # 作者
 		article_comment_pages = int(article_reply_amount)/10+1 if (int(article_reply_amount)%10 != 0) | (int(article_reply_amount)%10 == 0) else int(article_reply_amount)/10
@@ -145,19 +145,22 @@ if len(entrys) == 1:
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
 		time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
 		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
-		# break
+		break
 
 	for key in articles.keys():
+
 		article_id = articles[key]["url"].split('&t=')[-1]
 		articles[key].update({"id":article_id})
 		print "================= Article: %s ================="%(article_id)
 		print ">主題編號: %s\n>主題: %s\n>作者: %s\n>回覆數量: %s\n>回覆頁數: %s\n>新增時間: %s\n>人氣:% s\n>文章網址: % s"%(str(articles[key]["id"]),str(articles[key]["title"]),str(articles[key]["author"]),str(articles[key]["reply_amount"]),str(articles[key]["comment_pages"]),str(articles[key]["time"]),str(articles[key]["popularity"]),str(articles[key]["url"]))
 		print "===============================================" + '='*(len(article_id)-1)
+
 		comments = {}
 		for comment_page in range(1,int(articles[key]["comment_pages"])):
 			comment_page_url = articles[key]["url"]+"&p="+str(comment_page)
 			comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
 			time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+			printProgress (articles.keys().index(key), len(articles.keys()), prefix = 'fetching articles...', suffix = '', decimals = 2, barLength = 20)
 			# break
 		articles[key].update({"comments":comments})
 		# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
