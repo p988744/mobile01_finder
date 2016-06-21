@@ -45,12 +45,12 @@ def get_article_comment(host_url,url):
 	soup = BeautifulSoup(res.text, "lxml")
 	try:
 		comment_pages = soup.select(".contentfoot .numbers")[0].get_text().encode("utf-8")
-		print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
+		# print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
 	except Exception, e:
 		res = rs.get(host_url+url, headers=ua)
 		soup = BeautifulSoup(res.text, "lxml")
 		comment_pages = soup.select(".contentfoot .numbers")[0].get_text().encode("utf-8")
-		print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
+		# print "total comment pages: "+comment_pages.split('(共')[-1].replace('頁)','')
 	comments = soup.select('main .single-post')
 	comment_data_dict = {}
 	for comment in comments:
@@ -66,8 +66,8 @@ def get_article_comment(host_url,url):
 			"number" : comment.select(".single-post-author .date")[0].get_text().encode("utf-8").split('#')[1],
 			"content" : comment.select(".single-post-content")[0].get_text().encode("utf-8")
 		}
-		print "---------- Comment: %s ----------"%(comment_number)
-		print ">>id: %s\n>>回應者: %s\n>>回應順序: %s\n>>回應時間: %s\n>>回應內容: %s\n"%(comment_data["id"],comment_data["author"],comment_data["number"],comment_data["create_time"],comment_data["content"])
+		# print "---------- Comment: %s ----------"%(comment_number)
+		# print ">>id: %s\n>>回應者: %s\n>>回應順序: %s\n>>回應時間: %s\n>>回應內容: %s\n"%(comment_data["id"],comment_data["author"],comment_data["number"],comment_data["create_time"],comment_data["content"])
 		# break
 		comment_data_dict = merge_two_dicts(comment_data_dict,{ comment_id : comment_data })
 	return comment_data_dict
@@ -99,22 +99,53 @@ def get_board_content(host_url,url):
 			"reply_amount" : article_reply_amount,  # 回覆數量
 			"time" : article_time, # 新增時間
 			"author" : article_author, # 作者
-			"comment_pages" : article_comment_pages # 回應總頁數
+			"comment_pages" : article_comment_pages, # 回應總頁數
+			"status" : "0"
 		}
 		# print article_data
 		article_data_dict = merge_two_dicts(article_data_dict,{ article_url : article_data })
 		
 		
 		page_article_list.append([str(board_title),str(article_title),str(article_author),str(article_reply_amount),str(article_time),str(article_popularity),str(article_url)])
-		comment_pages = int(article_reply_amount)/10+1 if int(article_reply_amount)%10 != 0 else int(article_reply_amount)/10
+		# comment_pages = int(article_reply_amount)/10+1 if int(article_reply_amount)%10 != 0 else int(article_reply_amount)/10
 		# print comment_pages
-		for comment_page in range(1,comment_pages+1):
+		# for comment_page in range(1,comment_pages+1):
 			# time.sleep(float(random.randint(100,300))/100) 
-			commemt_url = article_url + "&p=" + str(comment_page)
+			# commemt_url = article_url + "&p=" + str(comment_page)
 			# print commemt_url
 			# get_article_comment(host_url,article_url,comment_page)
 	# print article_data_dict.keys()
 	return article_data_dict
+
+
+def get_atricles(input_articles):
+	index_counter = 0 #計算走訪位置
+	for key in input_articles.keys():
+		# print input_articles[key]["title"]
+		# print input_articles[key]["comment_pages"]
+		index_counter = index_counter+1
+		printProgress (index_counter, len(input_articles.keys()), prefix = 'fetching Articles...', suffix = '', decimals = 2, barLength = 20)
+		# print type(input_articles[key]["status"])
+		if input_articles[key]["status"]=="0":
+			article_id = input_articles[key]["url"].split('&t=')[-1]
+			input_articles[key].update({"id":article_id})
+			# print "================= Article: %s ================="%(article_id)
+			# print ">主題編號: %s\n>主題: %s\n>作者: %s\n>回覆數量: %s\n>回覆頁數: %s\n>新增時間: %s\n>人氣:% s\n>文章網址: % s"%(str(input_articles[key]["id"]),str(input_articles[key]["title"]),str(input_articles[key]["author"]),str(input_articles[key]["reply_amount"]),str(input_articles[key]["comment_pages"]),str(input_articles[key]["time"]),str(input_articles[key]["popularity"]),str(input_articles[key]["url"]))
+			# print "===============================================" + '='*(len(article_id)-1)
+
+			comments = {}
+			for comment_page in range(1,int(input_articles[key]["comment_pages"])+1):
+				print comment_page
+				comment_page_url = input_articles[key]["url"]+"&p="+str(comment_page)
+				comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
+				time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
+				# break
+			input_articles[key].update({"comments":comments})
+			# print "update comment"
+			input_articles[key].update({"status":1})
+			# print "update status"
+			# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+	return input_articles
 
 ############### main ###############
 host_url = "http://www.mobile01.com/"
@@ -140,10 +171,10 @@ if len(entrys) == 1:
 		if entry.select('h2')[1]!="精選文章":
 			board_title = entry.select('h2')[1].get_text() # 版面標題
 			board_title = board_title.encode("utf-8")
-			print str(board_title)
+			# print str(board_title)
 	##### 取得總頁數 #####
 	pages = int(entry.select('.pagination a')[-1].get_text())
-	print "total pages:" + str(pages)
+	# print "total pages:" + str(pages)
 	##### 取得所有文章網址 #####
 	articles = {} 
 	for page in range(1,pages+1):
@@ -151,34 +182,36 @@ if len(entrys) == 1:
 		articles = merge_two_dicts(articles,get_board_content(host_url,page_url))
 		time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
 		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
-		# break
 
-	for key in articles.keys():
+		break
+	output_data = json.dumps(articles, ensure_ascii=False)
 
-		article_id = articles[key]["url"].split('&t=')[-1]
-		articles[key].update({"id":article_id})
-		print "================= Article: %s ================="%(article_id)
-		print ">主題編號: %s\n>主題: %s\n>作者: %s\n>回覆數量: %s\n>回覆頁數: %s\n>新增時間: %s\n>人氣:% s\n>文章網址: % s"%(str(articles[key]["id"]),str(articles[key]["title"]),str(articles[key]["author"]),str(articles[key]["reply_amount"]),str(articles[key]["comment_pages"]),str(articles[key]["time"]),str(articles[key]["popularity"]),str(articles[key]["url"]))
-		print "===============================================" + '='*(len(article_id)-1)
+	with open('results/target_list.txt', 'w') as outfile_list:
+		outfile_list.write(output_data)
 
-		comments = {}
-		for comment_page in range(1,int(articles[key]["comment_pages"])):
-			comment_page_url = articles[key]["url"]+"&p="+str(comment_page)
-			comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
-			time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
+with open("results/target_list.txt",'r') as data_file:
+    articles = json.load(data_file)
+# print type(articles)
+retry_times = 10
+while(retry_times):
+	try:
+		articles = get_atricles(articles)
+		retry_times = 0
+	except Exception, e:
+		retry_times = retry_times-1
+		print "retry times: "+str(retry_times)
 
-			# break
-		articles[key].update({"comments":comments})
-		# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
 
-data = json.dumps(articles, ensure_ascii=False)
+data = json.dumps(articles)
 print "++++++++++++++++++++++++++ JSON ++++++++++++++++++++++++++"
-print data
+# print data
 
 # 檢查目錄是否存在
 directory = "results"
 if not os.path.exists(directory):
     os.makedirs(directory)
+
 with open('results/data.txt', 'w') as outfile:
-    json.dump(unicode(data, "utf-8"), outfile)
+    outfile.write(data)
+
 
