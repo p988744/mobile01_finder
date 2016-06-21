@@ -183,7 +183,7 @@ if len(entrys) == 1:
 		time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
 		printProgress (page, pages, prefix = 'fetching Links...', suffix = '', decimals = 2, barLength = 20)
 
-		break
+		# break
 	output_data = json.dumps(articles, ensure_ascii=False)
 
 	with open('results/target_list.txt', 'w') as outfile_list:
