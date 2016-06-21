@@ -135,7 +135,7 @@ def get_atricles(input_articles):
 
 			comments = {}
 			for comment_page in range(1,int(input_articles[key]["comment_pages"])+1):
-				print comment_page
+				# print comment_page
 				comment_page_url = input_articles[key]["url"]+"&p="+str(comment_page)
 				comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
 				time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
