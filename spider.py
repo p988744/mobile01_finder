@@ -121,30 +121,37 @@ def get_board_content(host_url,url):
 def get_atricles(input_articles):
 	index_counter = 0 #計算走訪位置
 	for key in input_articles.keys():
-		# print input_articles[key]["title"]
-		# print input_articles[key]["comment_pages"]
-		index_counter = index_counter+1
-		printProgress (index_counter, len(input_articles.keys()), prefix = 'fetching Articles...', suffix = '', decimals = 2, barLength = 20)
-		# print type(input_articles[key]["status"])
-		if input_articles[key]["status"]=="0":
-			article_id = input_articles[key]["url"].split('&t=')[-1]
-			input_articles[key].update({"id":article_id})
-			# print "================= Article: %s ================="%(article_id)
-			# print ">主題編號: %s\n>主題: %s\n>作者: %s\n>回覆數量: %s\n>回覆頁數: %s\n>新增時間: %s\n>人氣:% s\n>文章網址: % s"%(str(input_articles[key]["id"]),str(input_articles[key]["title"]),str(input_articles[key]["author"]),str(input_articles[key]["reply_amount"]),str(input_articles[key]["comment_pages"]),str(input_articles[key]["time"]),str(input_articles[key]["popularity"]),str(input_articles[key]["url"]))
-			# print "===============================================" + '='*(len(article_id)-1)
+		try:
+			# print input_articles[key]["title"]
+			# print input_articles[key]["comment_pages"]
+			index_counter = index_counter+1
+			printProgress (index_counter, len(input_articles.keys()), prefix = 'fetching Articles...', suffix = '', decimals = 2, barLength = 20)
+			# print type(input_articles[key]["status"])
+			if input_articles[key]["status"]=="0":
+				article_id = input_articles[key]["url"].split('&t=')[-1]
+				input_articles[key].update({"id":article_id})
+				# print "================= Article: %s ================="%(article_id)
+				# print ">主題編號: %s\n>主題: %s\n>作者: %s\n>回覆數量: %s\n>回覆頁數: %s\n>新增時間: %s\n>人氣:% s\n>文章網址: % s"%(str(input_articles[key]["id"]),str(input_articles[key]["title"]),str(input_articles[key]["author"]),str(input_articles[key]["reply_amount"]),str(input_articles[key]["comment_pages"]),str(input_articles[key]["time"]),str(input_articles[key]["popularity"]),str(input_articles[key]["url"]))
+				# print "===============================================" + '='*(len(article_id)-1)
 
-			comments = {}
-			for comment_page in range(1,int(input_articles[key]["comment_pages"])+1):
-				# print comment_page
-				comment_page_url = input_articles[key]["url"]+"&p="+str(comment_page)
-				comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
-				time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
-				# break
-			input_articles[key].update({"comments":comments})
-			# print "update comment"
-			input_articles[key].update({"status":1})
-			# print "update status"
-			# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+				comments = {}
+				for comment_page in range(1,int(input_articles[key]["comment_pages"])+1):
+					# print comment_page
+					comment_page_url = input_articles[key]["url"]+"&p="+str(comment_page)
+					comments = merge_two_dicts(comments,get_article_comment(host_url,comment_page_url))
+					time.sleep(float(random.randint(100,300))/100) # 版面走訪太快會被ban
+					# break
+				input_articles[key].update({"comments":comments})
+				# print "update comment"
+				input_articles[key].update({"status":1})
+				# print "update status"
+				# time.sleep(float(random.randint(100,200))/100) # 版面走訪太快會被ban
+		except Exception, e:
+			print "error at "+input_articles[key]["url"]
+			print e
+			input_articles[key].update({"status":2})
+			continue
+		
 	return input_articles
 
 ############### main ###############
@@ -186,10 +193,10 @@ if len(entrys) == 1:
 		# break
 	output_data = json.dumps(articles, ensure_ascii=False)
 
-	with open('results/target_list.txt', 'w') as outfile_list:
+	with open('results/target_list.json', 'w') as outfile_list:
 		outfile_list.write(output_data)
 
-with open("results/target_list.txt",'r') as data_file:
+with open("results/target_list.json",'r') as data_file:
     articles = json.load(data_file)
 # print type(articles)
 retry_times = 10
@@ -211,7 +218,7 @@ directory = "results"
 if not os.path.exists(directory):
     os.makedirs(directory)
 
-with open('results/data.txt', 'w') as outfile:
+with open('results/data.json', 'w') as outfile:
     outfile.write(data)
 
 
